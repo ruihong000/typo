@@ -62,5 +62,9 @@ describe Admin::CategoriesController do
 
     assert_raise(ActiveRecord::RecordNotFound) { Category.find(test_id) }
   end
-  
+ 
+  it "successfully render the new category page" do
+    get "new"
+    response.should render_template("admin/categories/new")
+  end
 end
