@@ -2,7 +2,15 @@ class Admin::CategoriesController < Admin::BaseController
   cache_sweeper :blog_sweeper
 
   def index; redirect_to :action => 'new' ; end
-  # def edit; new_or_edit;  end
+  def edit
+    respond_to do |format|
+      format.html { new_or_edit }
+      format.js { 
+        @category = Category.find(params[:id])
+      }
+    end
+    
+    end
 
   def new 
     respond_to do |format|
@@ -21,51 +29,36 @@ class Admin::CategoriesController < Admin::BaseController
     redirect_to :action => 'new'
   end
 
-  def edit
-      @categories = Category.find(:all)
-      # if params[:action] == "edit"
-      #   @category = Category.find(params[:id])
-      #   @category.attributes = params[:category]
-      # end
-      @category = Category.find(params[:id])
-      @category.attributes = params[:category]
-      if request.post?
-        respond_to do |format|
-          format.html { save_category }
-          format.js do 
-            @category.save
-            @article = Article.new
-            @article.categories << @category
-            return render(:partial => 'admin/content/categories')
-          end
-        end
-        return
-      end
-      render 'new'
-    end
-
   private
-  
+
   def new_or_edit
-      @categories = Category.find(:all)
+    puts "#{params}"
+    @categories = Category.find(:all)
+    if params[:id].nil?
       @category = Category.new
       @category.attributes = params[:category]
-      if request.post?
-        respond_to do |format|
-          format.html { save_category }
-          format.js do 
-            @category.save
-            @article = Article.new
-            @article.categories << @category
-            return render(:partial => 'admin/content/categories')
-          end
+    else
+      @category = Category.find(params[:id])
+      @category.attributes = params[:category]
+      
+    end
+    puts " look at here *************#{@category.attributes}"
+    puts "I will never forget ..........*******^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+    if request.post?
+      respond_to do |format|
+        format.html { save_category }
+        format.js do 
+          @category.save
+          @article = Article.new
+          @article.categories << @category
+          return render(:partial => 'admin/content/categories')
         end
-        return
       end
-      render 'new'
+      return
+    end
+    render 'new'
   end
 
-  
   def save_category
     if @category.save!
       flash[:notice] = _('Category was successfully saved.')
